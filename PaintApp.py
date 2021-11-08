@@ -32,7 +32,8 @@ class PaintingApplication(QMainWindow):
         self.drawing = False
         self.brushSize = 3
         self.brushColor = Qt.black  # documenation: https://doc.qt.io/qtforpython/PySide2/QtCore/Qt.html
-        self.brushType = Qt.SolidLine
+        self.brushType = Qt.DashDotDotLine
+        self.cap = Qt.RoundCap
 
         # reference to last point recorded by mouse
         self.lastPoint = QPoint()  # documenation: https://doc.qt.io/qt-5/qpoint.html
@@ -43,8 +44,9 @@ class PaintingApplication(QMainWindow):
             " File")  # add the file menu to the menu bar, the space is required as "File" is reserved in Mac
         brushSizeMenu = mainMenu.addMenu(" Brush Size")  # add the "Brush Size" menu to the menu bar
         brushColorMenu = mainMenu.addMenu(" Brush Colour")  # add the "Brush Colour" menu to the menu bar
-        helpMenu = mainMenu.addMenu("Help")
         brushLineTypes = mainMenu.addMenu("Line Types")
+        capTypes = mainMenu.addMenu("Cap Types")
+        helpMenu = mainMenu.addMenu("Help")
 
         # open a file
         openAction = QAction(QIcon("./icons/open.png"), "Open",
@@ -111,15 +113,35 @@ class PaintingApplication(QMainWindow):
 
         yellowAction = QAction(QIcon("./icons/yellow.png"), "Yellow", self)
         yellowAction.setShortcut("Ctrl+Y")
-        brushColorMenu.addAction(yellowAction);
+        brushColorMenu.addAction(yellowAction)
         yellowAction.triggered.connect(self.yellow)
 
         # brush line types menu
         solidAction = QAction(QIcon("./icons/solid.png"), "Solid", self)
         solidAction.setShortcut("Ctrl+-")
-        # no need to set the trigger because default trigger is solid
         brushLineTypes.addAction(solidAction)
+        solidAction.triggered.connect(self.solid)
 
+        dashedAction = QAction(QIcon("./icons/dashed.png"), "Dashed", self)
+        dashedAction.setShortcut("Ctrl+=")
+        brushLineTypes.addAction(dashedAction)
+        dashedAction.triggered.connect(self.dashed)
+
+        # cap type menu
+        roundCap = QAction(QIcon("./icons/round.png"), "Round",self)
+        roundCap.setShortcut("Ctrl+p")
+        capTypes.addAction(roundCap)
+        roundCap.triggered.connect(self.roundCap)
+
+        squareCap = QAction(QIcon("./icons/round.png"), "Square", self)
+        squareCap.setShortcut("Ctrl+l")
+        capTypes.addAction(squareCap)
+        squareCap.triggered.connect(self.squareCap)
+
+        flatCap = QAction(QIcon("./icons/round.png"), "Flat", self)
+        flatCap.setShortcut("Ctrl+m")
+        capTypes.addAction(flatCap)
+        flatCap.triggered.connect(self.flatCap)
 
         # help menu
         aboutAction = QAction(QIcon("./icons/about.png"), "About", self)
@@ -140,10 +162,10 @@ class PaintingApplication(QMainWindow):
                        event):  # when the mouse is moved, documenation: documentation: https://doc.qt.io/qt-5/qwidget.html#mouseMoveEvent
         if event.buttons() & Qt.LeftButton & self.drawing:  # if there was a press, and it was the left button and we are in drawing mode
             painter = QPainter(self.image)  # object which allows drawing to take place on an image
-            # allows the selection of brush colour, brish size, line type, cap type, join type. Images available here http://doc.qt.io/qt-5/qpen.html
-            painter.setPen(QPen(self.brushColor, self.brushSize, self.brushType, Qt.RoundCap, Qt.RoundJoin))
+            # allows the selection of brush colour, brush size, line type, cap type, join type. Images available here http://doc.qt.io/qt-5/qpen.html
+            painter.setPen(QPen(self.brushColor, self.brushSize, Qt.SolidLine, self.cap, Qt.RoundJoin))
             painter.drawLine(self.lastPoint,
-                             event.pos())  # draw a line from the point of the orginal press to the point to where the mouse was dragged to
+                             event.pos())  # draw a line from the point of the original press to the point to where the mouse was dragged to
             self.lastPoint = event.pos()  # set the last point to refer to the point we have just moved to, this helps when drawing the next line segment
             self.update()  # call the update method of the widget which calls the paintEvent of this class
 
@@ -216,6 +238,25 @@ class PaintingApplication(QMainWindow):
 
     def yellow(self):
         self.brushColor = Qt.yellow
+
+    # action for brush types
+    def solid(self):
+        pass
+
+    def dashed(self, painter):
+        pass
+
+    # action for cap types
+    def roundCap(self):
+        self.cap=Qt.RoundCap
+
+    def squareCap(self):
+        self.cap = Qt.SquareCap
+
+    def flatCap(self):
+        self.cap = Qt.FlatCap
+
+
 
     # help trigger
     # def about(self, i):
